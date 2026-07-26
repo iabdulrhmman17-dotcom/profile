@@ -32,12 +32,12 @@
     <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/Chart.js"></script>
     
     <style>
         body {
             font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            overflow: hidden;
+            overflow-x: hidden;
         }
         .glass-card-dark {
             background: rgba(15, 23, 42, 0.65);
@@ -74,27 +74,35 @@
     <!-- 3D Background Canvas -->
     <div id="canvas-container" class="fixed inset-0 pointer-events-none z-0"></div>
 
+    <!-- Mobile Overlay Backdrop -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-30 hidden lg:hidden transition-opacity"></div>
+
     <!-- Main Container -->
     <div class="relative z-10 flex h-screen overflow-hidden">
 
         <!-- SIDEBAR -->
-        <aside id="sidebar" class="w-72 flex-shrink-0 flex flex-col justify-between border-l border-slate-800/80 bg-slate-900/80 backdrop-blur-2xl p-5 transition-colors duration-300">
+        <aside id="sidebar" class="fixed lg:static inset-y-0 right-0 z-40 w-72 flex-shrink-0 flex flex-col justify-between border-l border-slate-800/80 bg-slate-900/95 lg:bg-slate-900/80 backdrop-blur-2xl p-5 transition-transform duration-300 translate-x-full lg:translate-x-0 shadow-2xl lg:shadow-none">
             <div>
-                <!-- Logo -->
-                <div class="flex items-center gap-3 px-2 py-3 mb-6">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-cyan-400 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-cyan-500/30">
-                        ERP
+                <!-- Logo & Close Button for Mobile -->
+                <div class="flex items-center justify-between px-2 py-3 mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-cyan-400 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-cyan-500/30">
+                            ERP
+                        </div>
+                        <div>
+                            <h1 class="font-extrabold text-lg tracking-wider bg-gradient-to-r from-blue-400 via-indigo-300 to-cyan-400 bg-clip-text text-transparent">
+                                NEXUS ERP
+                            </h1>
+                            <span class="text-[10px] text-slate-400 uppercase tracking-widest block font-medium">نظام المؤسسات الذكي</span>
+                        </div>
                     </div>
-                    <div>
-                        <h1 class="font-extrabold text-lg tracking-wider bg-gradient-to-r from-blue-400 via-indigo-300 to-cyan-400 bg-clip-text text-transparent">
-                            NEXUS ERP
-                        </h1>
-                        <span class="text-[10px] text-slate-400 uppercase tracking-widest block font-medium">نظام المؤسسات الذكي</span>
-                    </div>
+                    <button id="close-sidebar" class="p-2 text-slate-400 hover:text-white lg:hidden">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
                 </div>
 
                 <!-- Navigation Links -->
-                <nav class="space-y-1.5">
+                <nav class="space-y-1.5 overflow-y-auto max-h-[calc(100vh-220px)]">
                     <button data-section="dashboard-section" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/25">
                         <i data-lucide="activity" class="w-5 h-5"></i>
                         <span>لوحة التحكم الرئيسية</span>
@@ -131,7 +139,7 @@
             </div>
 
             <!-- User Role Card & Theme Toggle -->
-            <div id="user-card" class="p-4 rounded-2xl glass-card-dark flex items-center justify-between">
+            <div id="user-card" class="p-4 rounded-2xl glass-card-dark flex items-center justify-between mt-4">
                 <div class="flex items-center gap-3">
                     <div class="w-9 h-9 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-sm border border-cyan-500/30">
                         SA
@@ -151,24 +159,30 @@
         </aside>
 
         <!-- MAIN CONTENT -->
-        <main class="flex-1 flex flex-col overflow-y-auto">
+        <main class="flex-1 flex flex-col overflow-y-auto w-full">
             <!-- Header Bar -->
-            <header id="header" class="px-8 py-4 flex items-center justify-between border-b border-slate-800/80 bg-slate-900/40 backdrop-blur-md sticky top-0 z-20">
-                <div class="relative w-96">
-                    <i data-lucide="search" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" id="global-search" placeholder="البحث في النظام، الموظفين، الفواتير..." class="w-full pr-10 pl-4 py-2 rounded-xl text-sm border bg-slate-900/80 border-slate-800 text-slate-200 focus:outline-none focus:border-cyan-500/50 transition-all">
+            <header id="header" class="px-4 lg:px-8 py-4 flex items-center justify-between border-b border-slate-800/80 bg-slate-900/40 backdrop-blur-md sticky top-0 z-20 gap-3">
+                <div class="flex items-center gap-3 flex-1 max-w-md">
+                    <!-- Mobile Menu Trigger -->
+                    <button id="open-sidebar" class="p-2 rounded-xl bg-slate-800/50 text-slate-300 hover:text-white lg:hidden">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                    <div class="relative w-full">
+                        <i data-lucide="search" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="global-search" placeholder="البحث في النظام، الموظفين، الفواتير..." class="w-full pr-10 pl-4 py-2 rounded-xl text-xs lg:text-sm border bg-slate-900/80 border-slate-800 text-slate-200 focus:outline-none focus:border-cyan-500/50 transition-all">
+                    </div>
                 </div>
 
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 lg:gap-4">
                     <button class="p-2.5 rounded-xl border border-slate-800 bg-slate-900 text-slate-300 relative hover:border-cyan-500/50 transition-all">
                         <i data-lucide="bell" class="w-4 h-4"></i>
                         <span class="absolute top-1.5 left-1.5 w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
                         <span class="absolute top-1.5 left-1.5 w-2 h-2 rounded-full bg-cyan-400"></span>
                     </button>
 
-                    <div class="h-6 w-px bg-slate-800"></div>
+                    <div class="h-6 w-px bg-slate-800 hidden sm:block"></div>
 
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                         مزامنة حية نشطة
                     </span>
@@ -176,11 +190,11 @@
             </header>
 
             <!-- Dynamic Sections Content Wrapper -->
-            <div class="p-8 max-w-[1600px] mx-auto w-full">
+            <div class="p-4 lg:p-8 max-w-[1600px] mx-auto w-full">
                 
                 <!-- 1. DASHBOARD SECTION -->
                 <div id="dashboard-section" class="tab-content space-y-8">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         <div class="glass-card-dark p-6 rounded-2xl relative overflow-hidden group hover:border-cyan-500/40 transition-all duration-300">
                             <div class="flex justify-between items-start">
                                 <div>
@@ -305,7 +319,7 @@
                     </div>
 
                     <div class="glass-card-dark p-6 rounded-2xl">
-                        <div class="flex items-center justify-between mb-6">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
                             <div>
                                 <h2 class="text-lg font-bold">أحدث الصفقات والفواتير</h2>
                                 <p class="text-xs text-slate-400">العمليات الحية المعالجة عبر قاعدة البيانات</p>
@@ -315,7 +329,7 @@
                             </button>
                         </div>
                         <div class="overflow-x-auto">
-                            <table class="w-full text-right border-collapse">
+                            <table class="w-full text-right border-collapse min-w-[600px]">
                                 <thead>
                                     <tr class="border-b border-slate-800 text-xs text-slate-400 uppercase tracking-wider">
                                         <th class="py-3 px-4">رقم الفاتورة</th>
@@ -355,7 +369,7 @@
 
                 <!-- 2. HR SECTION (Interactive) -->
                 <div id="hr-section" class="tab-content hidden space-y-6">
-                    <div class="glass-card-dark p-6 rounded-2xl flex flex-wrap items-center justify-between gap-4">
+                    <div class="glass-card-dark p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div>
                             <h2 class="text-xl font-bold text-slate-100">إدارة الموارد البشرية (HR)</h2>
                             <p class="text-xs text-slate-400">سجل الكادر الوظيفي، الحضور، وتعيين الموظفين الجدد</p>
@@ -380,14 +394,14 @@
                     </div>
 
                     <div class="glass-card-dark p-6 rounded-2xl overflow-x-auto">
-                        <table class="w-full text-right border-collapse">
+                        <table class="w-full text-right border-collapse min-w-[600px]">
                             <thead>
                                 <tr class="border-b border-slate-800 text-xs text-slate-400">
                                     <th class="py-3 px-4">اسم الموظف</th>
                                     <th class="py-3 px-4">المسمى الوظيفي</th>
                                     <th class="py-3 px-4">القسم</th>
                                     <th class="py-3 px-4">الحالة</th>
-                                    <th class="py-3 px-4">الإجراءات</th>
+                                    <th class="py-3 px-4">الجراءات</th>
                                 </tr>
                             </thead>
                             <tbody id="employee-table-body" class="divide-y divide-slate-800/50 text-sm">
@@ -401,7 +415,7 @@
                                 <tr class="hover:bg-slate-800/20">
                                     <td class="py-3 px-4 font-semibold">سارة الغامدي</td>
                                     <td class="py-3 px-4 text-slate-400 text-xs">مديرة تسويق رقمي</td>
-                                    <td class="py-3 px-4 text-xs">التسويق والإعلام</td>
+                                    <td class="py-3 px-4 text-xs">التسويق والاعلام</td>
                                     <td class="py-3 px-4"><span class="px-2.5 py-1 rounded-full text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">على رأس العمل</span></td>
                                     <td class="py-3 px-4"><button onclick="this.closest('tr').remove()" class="text-rose-400 hover:underline text-xs">حذف</button></td>
                                 </tr>
@@ -493,7 +507,7 @@
 
                 <!-- 5. PROCUREMENT SECTION (Interactive) -->
                 <div id="procurement-section" class="tab-content hidden space-y-6">
-                    <div class="glass-card-dark p-6 rounded-2xl flex justify-between items-center">
+                    <div class="glass-card-dark p-6 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
                             <h2 class="text-xl font-bold text-slate-100">المشتريات والتعميد</h2>
                             <p class="text-xs text-slate-400">متابعةطلبات التعميد الرسمية وأوامر الشراء الحكومية والخاصة</p>
@@ -502,7 +516,7 @@
                     </div>
                     <div class="glass-card-dark p-6 rounded-2xl">
                         <ul id="procurement-list" class="space-y-3">
-                            <li class="p-4 bg-slate-900/60 rounded-xl border border-slate-800 flex justify-between items-center">
+                            <li class="p-4 bg-slate-900/60 rounded-xl border border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                                 <div>
                                     <span class="text-xs font-mono text-cyan-400">PO-9941</span>
                                     <h4 class="font-bold text-sm">شراء أجهزة سيرفرات فائقة السرعة Dell</h4>
@@ -524,9 +538,9 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="glass-card-dark p-6 rounded-2xl">
                             <h3 class="text-sm font-bold mb-4">تحديث المخزون الفوري</h3>
-                            <div class="flex gap-2 mb-4">
+                            <div class="flex flex-col sm:flex-row gap-2 mb-4">
                                 <input id="stock-item-name" type="text" placeholder="اسم المنتج" class="px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs flex-1 focus:outline-none">
-                                <input id="stock-item-qty" type="number" placeholder="الكمية" class="px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs w-24 focus:outline-none">
+                                <input id="stock-item-qty" type="number" placeholder="الكمية" class="px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs sm:w-24 focus:outline-none">
                                 <button onclick="addStockItem()" class="px-4 py-2 bg-cyan-500 text-slate-950 font-bold text-xs rounded-xl">إضافة</button>
                             </div>
                             <ul id="stock-list" class="space-y-2">
@@ -560,7 +574,7 @@
                 <div id="reports-section" class="tab-content hidden space-y-6">
                     <div class="glass-card-dark p-6 rounded-2xl">
                         <h2 class="text-xl font-bold text-slate-100">التقارير والتحليلات الذكية</h2>
-                        <p class="text-xs text-slate-400">توليد تقارير أداء فورية بنقر زر واحدة</p>
+                        <p class="text-xs text-slate-400">توليد تقارير أداء فورية بنقرة زر واحدة</p>
                     </div>
                     <div class="glass-card-dark p-6 rounded-2xl flex flex-wrap gap-4">
                         <button onclick="generateReport('المالية والمحاسبة')" class="px-4 py-3 bg-slate-900 border border-cyan-500/30 text-cyan-400 rounded-xl text-xs font-bold hover:bg-cyan-500/10">توليد تقرير الأداء المالي</button>
@@ -580,6 +594,21 @@
     <script>
         // 1. Initialize Lucide Icons
         lucide.createIcons();
+
+        // Mobile Sidebar Toggle Logic
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const openSidebarBtn = document.getElementById('open-sidebar');
+        const closeSidebarBtn = document.getElementById('close-sidebar');
+
+        function toggleMobileSidebar() {
+            sidebar.classList.toggle('translate-x-full');
+            sidebarOverlay.classList.toggle('hidden');
+        }
+
+        if(openSidebarBtn) openSidebarBtn.addEventListener('click', toggleMobileSidebar);
+        if(closeSidebarBtn) closeSidebarBtn.addEventListener('click', toggleMobileSidebar);
+        if(sidebarOverlay) sidebarOverlay.addEventListener('click', toggleMobileSidebar);
 
         // 2. Three.js Background 3D Grid & Moving Data Nodes
         const container = document.getElementById('canvas-container');
@@ -681,23 +710,23 @@
         themeBtn.addEventListener('click', () => {
             isDark = !isDark;
             const html = document.documentElement;
-            const sidebar = document.getElementById('sidebar');
+            const sidebarEl = document.getElementById('sidebar');
             const header = document.getElementById('header');
             const userCard = document.getElementById('user-card');
 
             if (isDark) {
                 html.classList.add('dark');
                 document.body.className = 'bg-slate-950 text-slate-100 transition-colors duration-300';
-                sidebar.className = 'w-72 flex-shrink-0 flex flex-col justify-between border-l border-slate-800/80 bg-slate-900/80 backdrop-blur-2xl p-5';
-                header.className = 'px-8 py-4 flex items-center justify-between border-b border-slate-800/80 bg-slate-900/40 backdrop-blur-md sticky top-0 z-20';
-                userCard.className = 'p-4 rounded-2xl glass-card-dark flex items-center justify-between';
+                sidebarEl.className = 'fixed lg:static inset-y-0 right-0 z-40 w-72 flex-shrink-0 flex flex-col justify-between border-l border-slate-800/80 bg-slate-900/95 lg:bg-slate-900/80 backdrop-blur-2xl p-5 transition-transform duration-300 translate-x-full lg:translate-x-0 shadow-2xl lg:shadow-none';
+                header.className = 'px-4 lg:px-8 py-4 flex items-center justify-between border-b border-slate-800/80 bg-slate-900/40 backdrop-blur-md sticky top-0 z-20 gap-3';
+                userCard.className = 'p-4 rounded-2xl glass-card-dark flex items-center justify-between mt-4';
                 themeBtn.innerHTML = '<i data-lucide="sun" class="w-4 h-4 text-amber-400"></i>';
             } else {
                 html.classList.remove('dark');
                 document.body.className = 'bg-slate-100 text-slate-900 transition-colors duration-300';
-                sidebar.className = 'w-72 flex-shrink-0 flex flex-col justify-between border-l border-slate-200 bg-white/80 backdrop-blur-2xl p-5';
-                header.className = 'px-8 py-4 flex items-center justify-between border-b border-slate-200 bg-white/40 backdrop-blur-md sticky top-0 z-20';
-                userCard.className = 'p-4 rounded-2xl glass-card-light flex items-center justify-between';
+                sidebarEl.className = 'fixed lg:static inset-y-0 right-0 z-40 w-72 flex-shrink-0 flex flex-col justify-between border-l border-slate-200 bg-white/95 lg:bg-white/80 backdrop-blur-2xl p-5 transition-transform duration-300 translate-x-full lg:translate-x-0 shadow-2xl lg:shadow-none';
+                header.className = 'px-4 lg:px-8 py-4 flex items-center justify-between border-b border-slate-200 bg-white/40 backdrop-blur-md sticky top-0 z-20 gap-3';
+                userCard.className = 'p-4 rounded-2xl glass-card-light flex items-center justify-between mt-4';
                 themeBtn.innerHTML = '<i data-lucide="moon" class="w-4 h-4 text-indigo-600"></i>';
             }
             lucide.createIcons();
@@ -723,6 +752,11 @@
                         content.classList.add('hidden');
                     }
                 });
+
+                // Automatically close sidebar on mobile after selecting a section
+                if (window.innerWidth < 1024) {
+                    toggleMobileSidebar();
+                }
             });
         });
 
